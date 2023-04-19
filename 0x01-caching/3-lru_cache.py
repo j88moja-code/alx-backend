@@ -1,40 +1,35 @@
-#!/usr/bin/python3
-"""Create a class LRUCache that inherits
-from BaseCaching and is a caching system
-"""
+#!/usr/bin/env python3
+""" Python caching systems """
+
 from base_caching import BaseCaching
 
 
 class LRUCache(BaseCaching):
-    """least recently used caching system"""
-
-    USED = {}
+    """ LRU caching system """
 
     def __init__(self):
+        ''' Initialize class instance. '''
         super().__init__()
+        self.current_keys = []
 
     def put(self, key, item):
-        """Add chaching to caching system"""
-        if key is None or item is None:
-            pass
-        else:
-            self.cache_data.update({key: item})
-            self.USED.update({key: 0})
-            if self.cache_data.__len__() > super().MAX_ITEMS:
-                pop_item = min(self.USED)
-                if self.cache_data.get(pop_item) is not None:
-                    self.USED.pop(pop_item)
-                    self.cache_data.pop(pop_item)
-                print("DISCARD: {}".format(pop_item))
+        """ Add an item in the cache """
+        if key is not None or item is not None:
+            self.cache_data[key] = item
+            if key not in self.current_keys:
+                self.current_keys.append(key)
+            else:
+                self.current_keys.append(self.current_keys.pop(
+                    self.current_keys.index(key)))
+            if len(self.current_keys) > BaseCaching.MAX_ITEMS:
+                discarded_key = self.current_keys.pop(0)
+                del self.cache_data[discarded_key]
+                print('DISCARD: {}'.format(discarded_key))
 
     def get(self, key):
-        """Get cache from caching system"""
-        if key is None or self.cache_data.get(key) is None:
-            return None
-
-        if self.USED.get(key) is not None:
-            self.USED[key] += 1
-        else:
-            self.USED[key] = 1
-
-        return self.cache_data.get(key)
+        """ Get an item by key """
+        if key is not None and key in self.cache_data:
+            self.current_keys.append(self.current_keys.pop(
+                self.current_keys.index(key)))
+            return self.cache_data.get(key)
+        return None
